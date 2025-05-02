@@ -50,10 +50,4 @@ class PostModel extends Model
         
         return $this->findAll();
     }
-
-    // Get posts by user ID
-    public function getPostsByUser($userId)
-    {
-        return $this->where('user_id', $userId)->findAll();
-    }
 }

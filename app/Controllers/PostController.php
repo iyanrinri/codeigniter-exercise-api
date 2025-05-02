@@ -376,32 +376,18 @@ class PostController extends ResourceController
     }
 
     /**
-     * Get posts by user
+     * Export posts to Excel
      * 
      * @OA\Get(
-     *     path="/users/posts",
+     *     path="/posts/export",
      *     tags={"Posts"},
-     *     summary="Returns all posts by a specific user",
+     *     summary="Export posts to Excel XLSX format",
      *     security={{"bearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
-     *         description="Successful operation",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="status", type="integer", example=200),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     type="object",
-     *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="title", type="string", example="Sample Post"),
-     *                     @OA\Property(property="content", type="string", example="This is a sample post content"),
-     *                     @OA\Property(property="username", type="string", example="johndoe"),
-     *                     @OA\Property(property="created_at", type="string", format="date-time"),
-     *                     @OA\Property(property="updated_at", type="string", format="date-time")
-     *                 )
-     *             )
+     *         description="Posts exported successfully",
+     *         @OA\MediaType(
+     *             mediaType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
      *         )
      *     ),
      *     @OA\Response(
@@ -414,11 +400,13 @@ class PostController extends ResourceController
      *     )
      * )
      */
-    public function userPosts()
+    public function export()
     {
-        $user = $this->request->user;
-        $userId = $user['id'];
-        $posts = $this->postModel->getPostsByUser($userId);
-        return $this->respond(['status' => 200, 'data' => $posts]);
+        $posts = $this->postModel->getPostWithUser();
+        
+        $excel = new \App\Libraries\Excel();
+        $export = new \App\Libraries\Excel\PostsExport($posts);
+        
+        return $excel->download($export, 'blog_posts_' . date('Y-m-d') . '.xlsx');
     }
 }

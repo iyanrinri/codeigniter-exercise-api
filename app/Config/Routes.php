@@ -10,6 +10,9 @@ use CodeIgniter\Router\RouteCollection;
 $routes->post('/register', 'AuthController::register');
 $routes->post('/login', 'AuthController::login');
 
+// Blog Routes (Public)
+$routes->get('/blog', 'BlogController::index');
+
 // Protected Routes
 $routes->get('/user', 'AuthController::getUser', ['filter' => 'auth']);
 $routes->post('/user/profile-image', 'AuthController::uploadProfileImage', ['filter' => 'auth']);
@@ -17,11 +20,11 @@ $routes->post('/user/profile-image', 'AuthController::uploadProfileImage', ['fil
 // Protected Posts Routes
 $routes->group('posts', ['filter' => 'auth'], function($routes) {
     $routes->get('/', 'PostController::index');
+    $routes->get('export', 'PostController::export'); // Add this line for Excel export
     $routes->post('/', 'PostController::create');
     $routes->get('(:num)', 'PostController::show/$1');
     $routes->put('(:num)', 'PostController::update/$1');
     $routes->delete('(:num)', 'PostController::delete/$1');
-    $routes->get('user/(:num)', 'PostController::userPosts/$1');
 });
 
 // Swagger Documentation Routes
