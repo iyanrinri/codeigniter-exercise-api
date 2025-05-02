@@ -14,6 +14,16 @@ $routes->post('/login', 'AuthController::login');
 $routes->get('/user', 'AuthController::getUser', ['filter' => 'auth']);
 $routes->post('/user/profile-image', 'AuthController::uploadProfileImage', ['filter' => 'auth']);
 
+// Protected Posts Routes
+$routes->group('posts', ['filter' => 'auth'], function($routes) {
+    $routes->get('/', 'PostController::index');
+    $routes->post('/', 'PostController::create');
+    $routes->get('(:num)', 'PostController::show/$1');
+    $routes->put('(:num)', 'PostController::update/$1');
+    $routes->delete('(:num)', 'PostController::delete/$1');
+    $routes->get('user/(:num)', 'PostController::userPosts/$1');
+});
+
 // Swagger Documentation Routes
 $routes->get('/docs', 'SwaggerController::docs');
 $routes->get('/swagger/openapi.json', 'SwaggerController::apiDocs');

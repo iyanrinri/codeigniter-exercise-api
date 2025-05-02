@@ -298,7 +298,6 @@ class AuthController extends ResourceController
      */
     public function getUser()
     {
-        // User data is already verified and attached to request by AuthFilter
         $user = $this->request->user;
         
         // Remove sensitive data
