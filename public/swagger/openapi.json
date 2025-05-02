@@ -1,9 +1,9 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "CodeIgniter API Documentation",
-        "version": "1.0.0",
-        "description": "API Documentation for CodeIgniter Project"
+        "title": "CI API Documentation",
+        "description": "API Documentation for CI API",
+        "version": "1.0.0"
     },
     "servers": [
         {
@@ -11,99 +11,130 @@
             "description": "Local Development Server"
         }
     ],
-    "components": {
-        "securitySchemes": {
-            "bearerAuth": {
-                "type": "http",
-                "scheme": "bearer",
-                "bearerFormat": "string"
+    "paths": {
+        "/api/resource.json": {
+            "get": {
+                "operationId": "c19e5b913cdd0fed552fb94e201a20d7",
+                "responses": {
+                    "200": {
+                        "description": "An example resource"
+                    }
+                }
             }
         },
-        "schemas": {
-            "RegisterRequest": {
-                "type": "object",
-                "required": ["name", "email", "password"],
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "description": "User's full name",
-                        "example": "John Doe"
-                    },
-                    "email": {
-                        "type": "string",
-                        "format": "email",
-                        "description": "User's email address",
-                        "example": "john@example.com"
-                    },
-                    "password": {
-                        "type": "string",
-                        "format": "password",
-                        "description": "User's password",
-                        "example": "password123"
+        "/user/profile-image": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Upload profile image",
+                "description": "Upload user profile image",
+                "operationId": "f8c293c87ac3bdd3edc17df222fc2d0c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "profile_image": {
+                                        "description": "Profile image file (jpg, jpeg, png up to 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
                     }
-                }
-            },
-            "LoginRequest": {
-                "type": "object",
-                "required": ["email", "password"],
-                "properties": {
-                    "email": {
-                        "type": "string",
-                        "format": "email",
-                        "description": "User's email address",
-                        "example": "john@example.com"
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile image uploaded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profile image updated successfully"
+                                        },
+                                        "profile_image": {
+                                            "type": "string",
+                                            "example": "/uploads/profile/user_1_123456.jpg"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
-                    "password": {
-                        "type": "string",
-                        "format": "password",
-                        "description": "User's password",
-                        "example": "password123"
+                    "400": {
+                        "description": "Invalid file or validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid file format"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
-                }
-            },
-            "UserResponse": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "name": {
-                        "type": "string",
-                        "example": "John Doe"
-                    },
-                    "email": {
-                        "type": "string",
-                        "format": "email",
-                        "example": "john@example.com"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2025-05-02 01:23:16"
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2025-05-02 01:23:27"
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
                     }
-                }
+                ]
             }
-        }
-    },
-    "paths": {
+        },
         "/register": {
             "post": {
-                "tags": ["Authentication"],
+                "tags": [
+                    "Authentication"
+                ],
                 "summary": "Register a new user",
                 "description": "Create a new user account",
-                "operationId": "register",
+                "operationId": "c03b45aa901e99c883ff52eab8b57c4b",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/RegisterRequest"
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
                     }
@@ -114,7 +145,6 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
                                     "properties": {
                                         "status": {
                                             "type": "string",
@@ -128,7 +158,8 @@
                                             "type": "integer",
                                             "example": 1
                                         }
-                                    }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -138,7 +169,6 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
                                     "properties": {
                                         "status": {
                                             "type": "string",
@@ -151,7 +181,8 @@
                                         "errors": {
                                             "type": "object"
                                         }
-                                    }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -161,16 +192,39 @@
         },
         "/login": {
             "post": {
-                "tags": ["Authentication"],
+                "tags": [
+                    "Authentication"
+                ],
                 "summary": "Login to the system",
                 "description": "Login with email and password to get API token",
-                "operationId": "login",
+                "operationId": "b5e4a9b6b2e51f894726ff59c31842d7",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/LoginRequest"
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "remember_me": {
+                                        "description": "Keep logged in for 7 days",
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
                     }
@@ -181,7 +235,6 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
                                     "properties": {
                                         "status": {
                                             "type": "string",
@@ -195,7 +248,8 @@
                                             "type": "string",
                                             "example": "92e741cd9901f6225e65b962c8fdd3083b8f959f82fe5eecadf5d6775830de0d"
                                         }
-                                    }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -205,7 +259,6 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
                                     "properties": {
                                         "status": {
                                             "type": "string",
@@ -215,7 +268,8 @@
                                             "type": "string",
                                             "example": "Invalid credentials"
                                         }
-                                    }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -225,31 +279,57 @@
         },
         "/user": {
             "get": {
-                "tags": ["User"],
+                "tags": [
+                    "User"
+                ],
                 "summary": "Get user information",
                 "description": "Get authenticated user's information",
-                "operationId": "getUser",
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
+                "operationId": "46d634b97167a056eb03e15482f36d7a",
                 "responses": {
                     "200": {
                         "description": "User information retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
                                     "properties": {
                                         "status": {
                                             "type": "string",
                                             "example": "success"
                                         },
                                         "data": {
-                                            "$ref": "#/components/schemas/UserResponse"
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "John Doe"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "format": "email",
+                                                    "example": "john@example.com"
+                                                },
+                                                "profile_image": {
+                                                    "type": "string",
+                                                    "example": "/uploads/profile/user_1_123456.jpg"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-05-02 01:23:16"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-05-02 01:23:27"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
-                                    }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -259,7 +339,6 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
                                     "properties": {
                                         "status": {
                                             "type": "string",
@@ -269,13 +348,37 @@
                                             "type": "string",
                                             "example": "No token provided"
                                         }
-                                    }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         }
-    }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "User",
+            "description": "User"
+        },
+        {
+            "name": "Authentication",
+            "description": "Authentication"
+        }
+    ]
 }

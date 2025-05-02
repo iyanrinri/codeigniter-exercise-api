@@ -7,12 +7,6 @@ use App\Models\UserModel;
 use App\Models\UserTokenModel;
 use OpenApi\Annotations as OA;
 
-/**
- * @OA\Info(
- *     title="CI API Documentation",
- *     version="1.0.0"
- * )
- */
 class AuthController extends ResourceController
 {
     protected $userModel;
@@ -22,6 +16,106 @@ class AuthController extends ResourceController
     {
         $this->userModel = new UserModel();
         $this->userTokenModel = new UserTokenModel();
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/user/profile-image",
+     *     tags={"User"},
+     *     summary="Upload profile image",
+     *     description="Upload user profile image",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     property="profile_image",
+     *                     type="string",
+     *                     format="binary",
+     *                     description="Profile image file (jpg, jpeg, png up to 2MB)"
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Profile image uploaded successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="message", type="string", example="Profile image updated successfully"),
+     *             @OA\Property(property="profile_image", type="string", example="/uploads/profile/user_1_123456.jpg")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid file or validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="Invalid file format")
+     *         )
+     *     )
+     * )
+     */
+    public function uploadProfileImage()
+    {
+        // Get authenticated user
+        $user = $this->request->user;
+
+        $img = $this->request->getFile('profile_image');
+        
+        if (!$img || !$img->isValid()) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'status' => 'error',
+                'message' => 'No valid image file uploaded'
+            ]);
+        }
+
+        // Validate file
+        $validationRule = [
+            'profile_image' => [
+                'label' => 'Profile Image',
+                'rules' => 'uploaded[profile_image]|max_size[profile_image,2048]|mime_in[profile_image,image/jpg,image/jpeg,image/png]|ext_in[profile_image,jpg,jpeg,png]'
+            ]
+        ];
+
+        if (!$this->validate($validationRule)) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'status' => 'error',
+                'message' => $this->validator->getError('profile_image')
+            ]);
+        }
+
+        // Create profile images directory if it doesn't exist
+        $uploadPath = WRITEPATH . 'uploads/profile/';
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0777, true);
+        }
+
+        // Generate unique filename
+        $newName = 'user_' . $user['id'] . '_' . time() . '.' . $img->getExtension();
+
+        // Delete old profile image if exists
+        if (!empty($user['profile_image']) && file_exists(WRITEPATH . 'uploads/' . $user['profile_image'])) {
+            unlink(WRITEPATH . 'uploads/' . $user['profile_image']);
+        }
+
+        // Move file to uploads directory
+        $img->move($uploadPath, $newName);
+
+        // Update user profile_image in database
+        $relativePath = 'profile/' . $newName;
+        $this->userModel->skipValidation(true)->update($user['id'], [
+            'profile_image' => $relativePath
+        ]);
+        // $this->userModel->update($user['id'], ['profile_image' => $relativePath]);
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Profile image updated successfully',
+            'profile_image' => '/uploads/' . $relativePath
+        ]);
     }
 
     /**
@@ -114,16 +208,11 @@ class AuthController extends ResourceController
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Login successful. Token remains valid for multiple sessions and devices.",
+     *         description="Login successful",
      *         @OA\JsonContent(
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(property="message", type="string", example="Login successful"),
-     *             @OA\Property(property="token", type="string", example="92e741cd9901f6225e65b962c8fdd3083b8f959f82fe5eecadf5d6775830de0d"),
-     *             @OA\Property(
-     *                 property="note",
-     *                 type="string",
-     *                 example="This token remains valid across browser refreshes and multiple devices"
-     *             )
+     *             @OA\Property(property="token", type="string", example="92e741cd9901f6225e65b962c8fdd3083b8f959f82fe5eecadf5d6775830de0d")
      *         )
      *     ),
      *     @OA\Response(
@@ -180,13 +269,6 @@ class AuthController extends ResourceController
      *     summary="Get user information",
      *     description="Get authenticated user's information",
      *     security={{"bearerAuth": {}}},
-     *     @OA\SecurityScheme(
-     *         securityScheme="bearerAuth",
-     *         type="http",
-     *         scheme="bearer",
-     *         bearerFormat="string",
-     *         description="Persistent bearer token that remains valid across sessions and devices"
-     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="User information retrieved successfully",
@@ -198,6 +280,7 @@ class AuthController extends ResourceController
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="name", type="string", example="John Doe"),
      *                 @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+     *                 @OA\Property(property="profile_image", type="string", example="/uploads/profile/user_1_123456.jpg"),
      *                 @OA\Property(property="created_at", type="string", format="date-time", example="2025-05-02 01:23:16"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2025-05-02 01:23:27")
      *             )

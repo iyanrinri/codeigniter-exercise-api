@@ -10,7 +10,7 @@ class UserModel extends Model
     protected $primaryKey = 'id';
     protected $useAutoIncrement = true;
     protected $returnType = 'array';
-    protected $allowedFields = ['name', 'email', 'password'];
+    protected $allowedFields = ['name', 'email', 'password', 'profile_image'];
     protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -18,7 +18,8 @@ class UserModel extends Model
     protected $validationRules = [
         'name'     => 'required|min_length[3]|max_length[100]',
         'email'    => 'required|valid_email|is_unique[users.email]',
-        'password' => 'required|min_length[6]'
+        'password' => 'required|min_length[6]',
+        'profile_image' => 'permit_empty|max_size[profile_image,2048]|mime_in[profile_image,image/jpg,image/jpeg,image/png]|ext_in[profile_image,jpg,jpeg,png]'
     ];
 
     protected $validationMessages = [

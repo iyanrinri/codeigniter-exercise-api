@@ -12,6 +12,7 @@ $routes->post('/login', 'AuthController::login');
 
 // Protected Routes
 $routes->get('/user', 'AuthController::getUser', ['filter' => 'auth']);
+$routes->post('/user/profile-image', 'AuthController::uploadProfileImage', ['filter' => 'auth']);
 
 // Swagger Documentation Routes
 $routes->get('/docs', 'SwaggerController::docs');
