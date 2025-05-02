@@ -10,18 +10,26 @@ class UserTokenModel extends Model
     protected $primaryKey = 'id';
     protected $useAutoIncrement = true;
     protected $returnType = 'array';
-    protected $allowedFields = ['user_id', 'token', 'device_info', 'last_used_at', 'created_at'];
+    protected $allowedFields = ['user_id', 'token', 'device_info', 'remember_me', 'expires_at', 'last_used_at', 'created_at'];
     
-    public function createToken($userId, $deviceInfo = null)
+    public function createToken($userId, $deviceInfo = null, $rememberMe = false)
     {
         $token = bin2hex(random_bytes(32));
+        $now = date('Y-m-d H:i:s');
+        
+        // Set expiration time based on remember_me flag
+        $expiresAt = date('Y-m-d H:i:s', 
+            strtotime($now . ($rememberMe ? ' +7 days' : ' +2 hours'))
+        );
         
         $this->insert([
             'user_id' => $userId,
             'token' => $token,
             'device_info' => $deviceInfo,
-            'last_used_at' => date('Y-m-d H:i:s'),
-            'created_at' => date('Y-m-d H:i:s')
+            'remember_me' => $rememberMe,
+            'expires_at' => $expiresAt,
+            'last_used_at' => $now,
+            'created_at' => $now
         ]);
         
         return $token;
@@ -29,7 +37,9 @@ class UserTokenModel extends Model
     
     public function validateToken($token)
     {
-        $tokenData = $this->where('token', $token)->first();
+        $tokenData = $this->where('token', $token)
+                         ->where('expires_at >', date('Y-m-d H:i:s'))
+                         ->first();
         
         if ($tokenData) {
             // Update last used timestamp

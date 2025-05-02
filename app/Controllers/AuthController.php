@@ -95,7 +95,8 @@ class AuthController extends ResourceController
      *         @OA\JsonContent(
      *             required={"email","password"},
      *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
-     *             @OA\Property(property="password", type="string", format="password", example="password123")
+     *             @OA\Property(property="password", type="string", format="password", example="password123"),
+     *             @OA\Property(property="remember_me", type="boolean", example=false, description="Keep logged in for 7 days")
      *         )
      *     ),
      *     @OA\Response(
@@ -133,6 +134,8 @@ class AuthController extends ResourceController
             ]);
         }
 
+        $rememberMe = isset($json->remember_me) ? (bool)$json->remember_me : false;
+
         $user = $this->userModel->where('email', $json->email)->first();
         
         if ($user && $this->userModel->verifyPassword($json->password, $user['password'])) {
@@ -142,7 +145,7 @@ class AuthController extends ResourceController
                          $this->request->getUserAgent()->getVersion();
             
             // Generate new token for this device
-            $token = $this->userTokenModel->createToken($user['id'], $deviceInfo);
+            $token = $this->userTokenModel->createToken($user['id'], $deviceInfo, $rememberMe);
 
             return $this->response->setJSON([
                 'status' => 'success',
