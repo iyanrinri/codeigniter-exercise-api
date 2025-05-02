@@ -70,6 +70,19 @@ class AuthController extends ResourceController
         ];
 
         if ($this->userModel->insert($data)) {
+            // Queue registration email
+            try {
+                $emailHelper = new \App\Helpers\EmailHelper();
+                if (!$emailHelper->sendRegistrationEmail([
+                    'name' => $data['name'],
+                    'email' => $data['email']
+                ])) {
+                    log_message('error', 'Failed to queue registration email');
+                }
+            } catch (\Exception $e) {
+                log_message('error', 'Failed to queue registration email: ' . $e->getMessage());
+            }
+
             return $this->response->setStatusCode(201)->setJSON([
                 'status' => 'success',
                 'message' => 'Registration successful',

@@ -67,3 +67,23 @@
 #--------------------------------------------------------------------
 
 # logger.threshold = 4
+
+
+queue.defaultHandler = database
+
+# Database Queue Handler
+queue.database.dbGroup = default
+queue.database.getShared = true
+queue.database.skipLocked = true
+
+# Redis Queue Handler
+queue.redis.host = 127.0.0.1
+queue.redis.password =
+queue.redis.port = 6379
+queue.redis.timeout = 0
+queue.redis.database = 0
+queue.redis.prefix = ""
+
+# Job Persistence
+queue.keepDoneJobs = false
+queue.keepFailedJobs = true

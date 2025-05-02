@@ -6,8 +6,8 @@ use CodeIgniter\Config\BaseConfig;
 
 class Email extends BaseConfig
 {
-    public string $fromEmail  = '';
-    public string $fromName   = '';
+    public string $fromEmail;
+    public string $fromName;
     public string $recipients = '';
 
     /**
@@ -18,7 +18,22 @@ class Email extends BaseConfig
     /**
      * The mail sending protocol: mail, sendmail, smtp
      */
-    public string $protocol = 'mail';
+    public string $protocol;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->protocol = getenv('email.protocol') ?: 'mail';
+        $this->SMTPHost = getenv('email.SMTPHost') ?: '';
+        $this->SMTPUser = getenv('email.SMTPUser') ?: '';
+        $this->SMTPPass = getenv('email.SMTPPass') ?: '';
+        $this->SMTPPort = (int)(getenv('email.SMTPPort') ?: 25);
+        $this->SMTPCrypto = getenv('email.SMTPCrypto') ?: 'tls';
+        $this->fromEmail = getenv('email.fromEmail') ?: '';
+        $this->fromName = getenv('email.fromName') ?: '';
+        $this->mailType = getenv('email.mailType') ?: 'text';
+    }
 
     /**
      * The server path to Sendmail.
@@ -28,22 +43,22 @@ class Email extends BaseConfig
     /**
      * SMTP Server Hostname
      */
-    public string $SMTPHost = '';
+    public string $SMTPHost;
 
     /**
      * SMTP Username
      */
-    public string $SMTPUser = '';
+    public string $SMTPUser;
 
     /**
      * SMTP Password
      */
-    public string $SMTPPass = '';
+    public string $SMTPPass;
 
     /**
      * SMTP Port
      */
-    public int $SMTPPort = 25;
+    public int $SMTPPort;
 
     /**
      * SMTP Timeout (in seconds)
@@ -62,7 +77,7 @@ class Email extends BaseConfig
      *             to the server. 'ssl' means implicit SSL. Connection on port
      *             465 should set this to ''.
      */
-    public string $SMTPCrypto = 'tls';
+    public string $SMTPCrypto;
 
     /**
      * Enable word-wrap
@@ -77,7 +92,7 @@ class Email extends BaseConfig
     /**
      * Type of mail, either 'text' or 'html'
      */
-    public string $mailType = 'text';
+    public string $mailType;
 
     /**
      * Character set (utf-8, iso-8859-1, etc.)
