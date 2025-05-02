@@ -10,7 +10,7 @@ class UserModel extends Model
     protected $primaryKey = 'id';
     protected $useAutoIncrement = true;
     protected $returnType = 'array';
-    protected $allowedFields = ['name', 'email', 'password', 'api_token'];
+    protected $allowedFields = ['name', 'email', 'password'];
     protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -44,17 +44,5 @@ class UserModel extends Model
     public function verifyPassword($password, $hash)
     {
         return password_verify($password, $hash);
-    }
-
-    public function generateToken()
-    {
-        // Generate a random string for the token
-        $token = bin2hex(random_bytes(32));
-        return $token;
-    }
-
-    public function getUserByToken($token)
-    {
-        return $this->where('api_token', $token)->first();
     }
 }

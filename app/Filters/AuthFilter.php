@@ -6,6 +6,7 @@ use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\UserModel;
+use App\Models\UserTokenModel;
 
 class AuthFilter implements FilterInterface
 {
@@ -24,13 +25,24 @@ class AuthFilter implements FilterInterface
         $token = str_replace('Bearer ', '', $token);
         
         // Validate token
+        $userTokenModel = new UserTokenModel();
+        $tokenData = $userTokenModel->validateToken($token);
+        
+        if (!$tokenData) {
+            return service('response')->setStatusCode(401)->setJSON([
+                'status' => 'error',
+                'message' => 'Invalid token'
+            ]);
+        }
+
+        // Get user data
         $userModel = new UserModel();
-        $user = $userModel->where('api_token', $token)->first();
+        $user = $userModel->find($tokenData['user_id']);
         
         if (!$user) {
             return service('response')->setStatusCode(401)->setJSON([
                 'status' => 'error',
-                'message' => 'Invalid token'
+                'message' => 'User not found'
             ]);
         }
 

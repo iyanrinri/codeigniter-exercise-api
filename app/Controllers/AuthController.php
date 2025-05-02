@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use CodeIgniter\RESTful\ResourceController;
 use App\Models\UserModel;
+use App\Models\UserTokenModel;
 use OpenApi\Annotations as OA;
 
 /**
@@ -15,10 +16,12 @@ use OpenApi\Annotations as OA;
 class AuthController extends ResourceController
 {
     protected $userModel;
+    protected $userTokenModel;
 
     public function __construct()
     {
         $this->userModel = new UserModel();
+        $this->userTokenModel = new UserTokenModel();
     }
 
     /**
@@ -97,11 +100,16 @@ class AuthController extends ResourceController
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Login successful",
+     *         description="Login successful. Token remains valid for multiple sessions and devices.",
      *         @OA\JsonContent(
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(property="message", type="string", example="Login successful"),
-     *             @OA\Property(property="token", type="string", example="92e741cd9901f6225e65b962c8fdd3083b8f959f82fe5eecadf5d6775830de0d")
+     *             @OA\Property(property="token", type="string", example="92e741cd9901f6225e65b962c8fdd3083b8f959f82fe5eecadf5d6775830de0d"),
+     *             @OA\Property(
+     *                 property="note",
+     *                 type="string",
+     *                 example="This token remains valid across browser refreshes and multiple devices"
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -128,11 +136,13 @@ class AuthController extends ResourceController
         $user = $this->userModel->where('email', $json->email)->first();
         
         if ($user && $this->userModel->verifyPassword($json->password, $user['password'])) {
-            // Generate new API token
-            $token = $this->userModel->generateToken();
+            // Get device info from user agent
+            $deviceInfo = $this->request->getUserAgent()->getPlatform() . ' - ' . 
+                         $this->request->getUserAgent()->getBrowser() . ' ' . 
+                         $this->request->getUserAgent()->getVersion();
             
-            // Update user with new token
-            $this->userModel->update($user['id'], ['api_token' => $token]);
+            // Generate new token for this device
+            $token = $this->userTokenModel->createToken($user['id'], $deviceInfo);
 
             return $this->response->setJSON([
                 'status' => 'success',
@@ -159,6 +169,7 @@ class AuthController extends ResourceController
      *         type="http",
      *         scheme="bearer",
      *         bearerFormat="string",
+     *         description="Persistent bearer token that remains valid across sessions and devices"
      *     ),
      *     @OA\Response(
      *         response=200,
